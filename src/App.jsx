@@ -10,7 +10,7 @@ function App() {
   return (
     <div className="flex justify-center items-center h-screen bg-black">
       <h1 className="text-5xl font-bold text-pink-500">
-        Hello World!
+        Hello World 123
       </h1>
     </div>
   )
