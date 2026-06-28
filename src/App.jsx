@@ -12,6 +12,7 @@ function App() {
       <h1 className="text-5xl font-bold text-pink-500">
         Hello World 123
       </h1>
+      <h1>Welcome to react</h1>
     </div>
   )
 }
