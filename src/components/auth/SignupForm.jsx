@@ -1,7 +1,9 @@
-import { Link } from "react-router-dom";
+import { Link,useNavigate} from "react-router-dom";
 import { Eye,EyeOff } from "lucide-react";
 import {useForm} from "react-hook-form";
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
+import { toast } from "@/components/ui/toast";
 
 import {
   Card,
@@ -21,12 +23,16 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 
+import {signup} from "../../api/signup.api";
 
 export default function SignupForm() {
+  const [loading,setLoading] = useState(false);
   const [showPassword,setShowPassword]=useState(false);
   const [showConfirmPassword,setShowConfirmPassword]=useState(false);
+
+  const navigate = useNavigate();
 
   const {
   register,
@@ -37,13 +43,41 @@ export default function SignupForm() {
   formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
-  console.log(data);
+  const onSubmit = async (data) => {
+  try {
+      setLoading(true);
 
-  reset();
+      const response = await signup(data);
 
-  setShowPassword(false);
-  setShowConfirmPassword(false);
+      console.log(response);
+
+      toast.add({
+          title: "Account Created",
+          description: response.message,
+          type: "success",
+      });
+
+      reset();
+
+      setShowPassword(false);
+      setShowConfirmPassword(false);
+
+      navigate("/login");
+
+    } catch (error) {
+      console.error(error);
+
+      toast.add({
+          title: "Signup Failed",
+          description:
+              error.response?.data?.message ||
+              "Something went wrong",
+          type: "error",
+      });
+    }
+    finally{
+      setLoading(false);
+    }
   };
   return (
     <>
@@ -220,9 +254,12 @@ export default function SignupForm() {
               {errors.securityAnswer?.message}
               </p>
             </div>
-            <Button className="w-full bg-indigo-600 hover:bg-indigo-700  h-11" type="submit">
-            Sign up
-          </Button>
+            <Button className="w-full bg-indigo-600 hover:bg-indigo-700  h-11 cursor-pointer" type="submit" disabled={loading}>
+              {loading ? <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creating Account...
+                       </> : "Sign Up"}
+            </Button>
           </form>
         </CardContent>
         <CardFooter>
