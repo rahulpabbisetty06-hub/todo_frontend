@@ -1,8 +1,10 @@
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { login } from "../../api/login.api";
+import { toast } from "@/components/ui/toast.jsx";
+import { Loader2 } from "lucide-react";
 
 import {
   Card,
@@ -20,6 +22,7 @@ import { Label } from "@/components/ui/label";
 export default function LoginForm() {
 
   const [showPassword, setShowPassword] = useState(false);
+  const [loading,setLoading] = useState(false);
 
   const {
     register,
@@ -30,13 +33,51 @@ export default function LoginForm() {
 
   const navigate = useNavigate();
 
-  const onSubmit = (data) => {
-    console.log(data);
+  const onSubmit = async (data) => {
+   try{
+    setLoading(true);
+
+    const response = await login(data);
+
+    console.log(response);
+
+    localStorage.setItem(
+      "accessToken",
+      response.data.accessToken
+    );
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(response.data.user)
+    );
+
+    /*console.log(
+    localStorage.getItem("accessToken")
+     );*/
+
+    toast.add({
+      title: "Login Successful",
+      description: `Welcome ${response.data.user.username}`,
+      type: "success",
+    });
 
     reset();
     setShowPassword(false);
 
     navigate("/dashboard");
+   }
+   catch(error){
+       toast.add({
+         title:"Login Failed",
+         description:
+          error.response?.data?.message ||
+          "Invalid username or password",
+         type: "error",
+       })
+   }
+   finally{
+    setLoading(false);
+   }
   };
 
 
@@ -163,9 +204,15 @@ export default function LoginForm() {
 
             <Button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 h-11" to="/dashboard"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 h-11 cursor-pointer"
+              disabled={loading}
             >
-              Login
+                {loading?(
+                  <>
+                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                     Signing In...
+                  </>
+                ):("Login")}
             </Button>
 
           </form>
